@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(powershell:*)",
+      "Bash(powershell.exe:*)",
+      "Bash(setx:*)",
+      "Bash(cmd:*)",
+      "Bash(claude plugins install:*)",
+      "Bash(claude plugins list)",
+      "Bash(claude plugins uninstall:*)",
+      "Bash(dir:*)",
+      "Skill(frontend-design:frontend-design)"
+    ]
+  },
+  "outputStyle": "default",
+  "spinnerTipsEnabled": true
+}
