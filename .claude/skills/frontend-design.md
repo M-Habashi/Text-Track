@@ -48,3 +48,59 @@ Remember: Claude is capable of extraordinary creative work. Don't hold back, sho
 ---
 
 **Workflow**: When editing UI files, always update this skill file and the UI output together to maintain consistency.
+
+---
+
+## Current Project: Text Compare Tool
+
+### File Structure
+```
+text-tracking/
+├── index.html              # Main HTML (structure only)
+├── css/
+│   └── styles.css          # All styles + design tokens
+└── js/
+    ├── tokenizer.js        # Text parsing module
+    ├── diff-engine.js      # Myers diff algorithm
+    ├── renderer.js         # HTML output generation
+    └── app.js              # App controller + events
+```
+
+### Aesthetic Direction
+**Editorial Minimalism** - Clean, paper-like feel inspired by literary magazines and professional writing tools.
+
+### Design Tokens (in css/styles.css)
+```css
+/* Colors */
+--color-bg-primary: #FAFAF8      /* Warm off-white */
+--color-text-primary: #1A1A1A    /* Near-black */
+--color-deleted: #C53030         /* Warm red */
+--color-inserted: #2563EB        /* Clear blue */
+--color-moved: #7C3AED           /* Purple */
+
+/* Typography */
+--font-serif: 'Crimson Pro'      /* Body text, textareas */
+--font-mono: 'JetBrains Mono'    /* Labels, stats, counts */
+```
+
+### Component Structure
+- **Header**: Title + subtitle
+- **Input Section**: Side-by-side textareas with word counts
+- **Controls**: Compare button (centered)
+- **Output Section**:
+  - Toggle buttons (Show/Hide changes)
+  - Statistics grid
+  - Diff output with paragraph support
+  - Legend
+
+### Display Modes
+1. **Visible**: Red strikethrough for deleted, blue for inserted, purple border for moved
+2. **Hidden**: Clean text, red dot markers for deletions, bold for insertions
+
+### JavaScript Modules
+| File | Exports | Purpose |
+|------|---------|---------|
+| `tokenizer.js` | `Tokenizer` | splitParagraphs, tokenizeWords, fingerprint, countWords |
+| `diff-engine.js` | `DiffEngine` | Myers diff, paragraph alignment, move detection |
+| `renderer.js` | `Renderer` | renderDiff, renderStats |
+| `app.js` | `App` | State management, event handling |
