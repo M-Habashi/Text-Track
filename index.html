@@ -14,6 +14,12 @@
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
+  <!-- HEADER -->
+  <header class="app-header">
+    <h1 class="app-title">Text Compare</h1>
+    <p class="app-subtitle">Word-level comparison with change tracking</p>
+  </header>
+
   <!-- APP CONTAINER -->
   <div class="app-container">
 
@@ -28,8 +34,8 @@
             <button class="traffic-light minimize" aria-label="Minimize" disabled></button>
             <button class="traffic-light maximize" aria-label="Maximize" data-target="original"></button>
           </div>
-          <span class="window-word-count" id="originalWordCount">0 words</span>
           <span class="window-title">Original</span>
+          <span class="window-word-count" id="originalWordCount">0 words</span>
         </div>
         <div class="window-body">
           <textarea
@@ -49,8 +55,8 @@
             <button class="traffic-light minimize" aria-label="Minimize" disabled></button>
             <button class="traffic-light maximize" aria-label="Maximize" data-target="revised"></button>
           </div>
-          <span class="window-word-count" id="revisedWordCount">0 words</span>
           <span class="window-title">Revised</span>
+          <span class="window-word-count" id="revisedWordCount">0 words</span>
         </div>
         <div class="window-body">
           <textarea
@@ -75,14 +81,11 @@
             <button class="traffic-light minimize" aria-label="Minimize" disabled></button>
             <button class="traffic-light maximize" aria-label="Maximize" data-target="comparison"></button>
           </div>
+          <span class="window-title">Comparison</span>
           <div class="comparison-toggle">
             <button type="button" class="toggle-btn active" data-mode="visible">Show</button>
             <button type="button" class="toggle-btn" data-mode="hidden">Hide</button>
           </div>
-          <span class="window-title">Comparison</span>
-        </div>
-        <div class="stats-bar" id="statsBar">
-          <!-- Stats rendered dynamically -->
         </div>
         <div class="window-body">
           <div class="comparison-output diff-visible" id="comparisonOutput">
@@ -92,25 +95,19 @@
             </div>
           </div>
         </div>
-        <div class="comparison-footer">
-          <div class="legend-item">
-            <span class="legend-deleted">removed</span>
-            <span class="legend-label">Deleted</span>
-          </div>
-          <div class="legend-item">
-            <span class="legend-inserted">added</span>
-            <span class="legend-label">Inserted</span>
-          </div>
-          <div class="legend-item">
-            <span class="legend-moved">moved</span>
-            <span class="legend-label">Moved</span>
-          </div>
+        <div class="comparison-footer" id="comparisonFooter">
+          <!-- Legend with stats rendered dynamically -->
         </div>
       </div>
 
     </div>
 
   </div>
+
+  <!-- FOOTER -->
+  <footer class="app-footer">
+    <p>Word-level diff with paragraph move detection</p>
+  </footer>
 
   <!-- MAXIMIZE MODAL -->
   <div class="modal-overlay" id="modalOverlay">
@@ -122,9 +119,20 @@
           <button class="traffic-light maximize" aria-label="Maximize" disabled></button>
         </div>
         <span class="window-title" id="modalTitle">Window</span>
+        <!-- Word count for text windows -->
+        <span class="window-word-count" id="modalWordCount" style="display: none;">0 words</span>
+        <!-- Toggle for comparison window -->
+        <div class="comparison-toggle" id="modalToggle" style="display: none;">
+          <button type="button" class="toggle-btn active" data-mode="visible">Show</button>
+          <button type="button" class="toggle-btn" data-mode="hidden">Hide</button>
+        </div>
       </div>
       <div class="modal-body" id="modalBody">
         <!-- Content cloned here -->
+      </div>
+      <!-- Footer for comparison window -->
+      <div class="comparison-footer" id="modalFooter" style="display: none;">
+        <!-- Legend rendered here -->
       </div>
     </div>
   </div>

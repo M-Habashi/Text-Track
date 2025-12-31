@@ -1,6 +1,6 @@
 /**
  * Renderer Module
- * Handles HTML rendering for diff output and statistics
+ * Handles HTML rendering for diff output, statistics, and legend
  */
 const Renderer = {
   /**
@@ -52,7 +52,7 @@ const Renderer = {
         movedIndicator = `
           <span class="moved-indicator">
             <span class="moved-indicator-icon"></span>
-            Moved Paragraph — was at position ${para.movedFrom + 1}
+            Moved paragraph — was at position ${para.movedFrom + 1}
           </span>
         `;
       }
@@ -98,31 +98,50 @@ const Renderer = {
   },
 
   /**
-   * Render statistics bar
+   * Render legend with stats
    * @param {Object} stats - Statistics from DiffEngine
    * @returns {string} HTML string
    */
-  renderStats(stats) {
-    if (!stats) return '';
+  renderLegend(stats) {
+    if (!stats) {
+      // Default legend without stats
+      return `
+        <div class="legend-item">
+          <span class="legend-deleted">removed</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-inserted">added</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-moved">moved</span>
+        </div>
+      `;
+    }
 
     let html = '';
 
+    // Removed
     html += `
-      <div class="stat-item stat-deleted">
-        <span class="stat-value">-${stats.wordsDeleted}</span>
-        <span class="stat-label">removed</span>
-      </div>
-      <div class="stat-item stat-inserted">
-        <span class="stat-value">+${stats.wordsAdded}</span>
-        <span class="stat-label">added</span>
+      <div class="legend-item">
+        <span class="legend-stat stat-deleted">-${stats.wordsDeleted}</span>
+        <span class="legend-deleted">Removed</span>
       </div>
     `;
 
+    // Added
+    html += `
+      <div class="legend-item">
+        <span class="legend-stat stat-inserted">+${stats.wordsAdded}</span>
+        <span class="legend-inserted">Added</span>
+      </div>
+    `;
+
+    // Moved paragraphs (only show if there are any)
     if (stats.paragraphsMoved > 0) {
       html += `
-        <div class="stat-item stat-moved">
-          <span class="stat-value">${stats.paragraphsMoved}</span>
-          <span class="stat-label">moved</span>
+        <div class="legend-item">
+          <span class="legend-stat stat-moved">${stats.paragraphsMoved}</span>
+          <span class="legend-moved">Moved paragraphs</span>
         </div>
       `;
     }

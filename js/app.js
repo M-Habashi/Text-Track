@@ -12,7 +12,7 @@ const App = {
     diffResult: null,
     displayMode: 'visible',
     debounceTimer: null,
-    debounceDelay: 300, // ms to wait after typing stops
+    debounceDelay: 300,
     activeModal: null
   },
 
@@ -25,12 +25,15 @@ const App = {
     originalWordCount: null,
     revisedWordCount: null,
     comparisonOutput: null,
-    statsBar: null,
+    comparisonFooter: null,
     modalOverlay: null,
     modalWindow: null,
     modalTitle: null,
     modalBody: null,
-    modalClose: null
+    modalClose: null,
+    modalWordCount: null,
+    modalToggle: null,
+    modalFooter: null
   },
 
   /**
@@ -40,6 +43,7 @@ const App = {
     this.cacheElements();
     this.bindEvents();
     this.updateWordCounts();
+    this.renderDefaultLegend();
   },
 
   /**
@@ -51,12 +55,15 @@ const App = {
     this.elements.originalWordCount = document.getElementById('originalWordCount');
     this.elements.revisedWordCount = document.getElementById('revisedWordCount');
     this.elements.comparisonOutput = document.getElementById('comparisonOutput');
-    this.elements.statsBar = document.getElementById('statsBar');
+    this.elements.comparisonFooter = document.getElementById('comparisonFooter');
     this.elements.modalOverlay = document.getElementById('modalOverlay');
     this.elements.modalWindow = document.getElementById('modalWindow');
     this.elements.modalTitle = document.getElementById('modalTitle');
     this.elements.modalBody = document.getElementById('modalBody');
     this.elements.modalClose = document.getElementById('modalClose');
+    this.elements.modalWordCount = document.getElementById('modalWordCount');
+    this.elements.modalToggle = document.getElementById('modalToggle');
+    this.elements.modalFooter = document.getElementById('modalFooter');
   },
 
   /**
@@ -74,9 +81,14 @@ const App = {
       this.debouncedCompare();
     });
 
-    // Toggle buttons for display mode
-    document.querySelectorAll('.comparison-toggle .toggle-btn').forEach(btn => {
+    // Toggle buttons for display mode (main window)
+    document.querySelectorAll('#comparisonWindow .comparison-toggle .toggle-btn').forEach(btn => {
       btn.addEventListener('click', (e) => this.setDisplayMode(e.target.dataset.mode));
+    });
+
+    // Toggle buttons for display mode (modal)
+    this.elements.modalToggle.querySelectorAll('.toggle-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => this.setDisplayMode(e.target.dataset.mode, true));
     });
 
     // Maximize buttons
@@ -106,15 +118,20 @@ const App = {
   },
 
   /**
+   * Render default legend (without stats)
+   */
+  renderDefaultLegend() {
+    this.elements.comparisonFooter.innerHTML = Renderer.renderLegend(null);
+  },
+
+  /**
    * Debounced comparison - waits for typing to stop
    */
   debouncedCompare() {
-    // Clear existing timer
     if (this.state.debounceTimer) {
       clearTimeout(this.state.debounceTimer);
     }
 
-    // Set new timer
     this.state.debounceTimer = setTimeout(() => {
       this.runComparison();
     }, this.state.debounceDelay);
@@ -134,6 +151,13 @@ const App = {
       `${origCount} word${origCount !== 1 ? 's' : ''}`;
     this.elements.revisedWordCount.textContent =
       `${revCount} word${revCount !== 1 ? 's' : ''}`;
+
+    // Update modal word count if open
+    if (this.state.activeModal === 'original') {
+      this.elements.modalWordCount.textContent = `${origCount} word${origCount !== 1 ? 's' : ''}`;
+    } else if (this.state.activeModal === 'revised') {
+      this.elements.modalWordCount.textContent = `${revCount} word${revCount !== 1 ? 's' : ''}`;
+    }
   },
 
   /**
@@ -143,40 +167,77 @@ const App = {
     const original = this.elements.originalText.value;
     const revised = this.elements.revisedText.value;
 
-    // Check if both have content
     if (!original.trim() || !revised.trim()) {
       this.state.diffResult = null;
       this.elements.comparisonOutput.innerHTML = Renderer.renderDiff(null, this.state.displayMode);
       this.elements.comparisonOutput.className = `comparison-output diff-${this.state.displayMode}`;
-      this.elements.statsBar.innerHTML = '';
+      this.elements.comparisonFooter.innerHTML = Renderer.renderLegend(null);
+
+      // Update modal if comparison is open
+      if (this.state.activeModal === 'comparison') {
+        this.updateModalComparison();
+      }
       return;
     }
 
-    // Run comparison
     this.state.diffResult = DiffEngine.compare(original, revised);
 
-    // Render results
-    this.elements.statsBar.innerHTML = Renderer.renderStats(this.state.diffResult.stats);
+    // Render main window
+    this.elements.comparisonFooter.innerHTML = Renderer.renderLegend(this.state.diffResult.stats);
     this.elements.comparisonOutput.innerHTML = Renderer.renderDiff(this.state.diffResult, this.state.displayMode);
     this.elements.comparisonOutput.className = `comparison-output diff-${this.state.displayMode}`;
+
+    // Update modal if comparison is open
+    if (this.state.activeModal === 'comparison') {
+      this.updateModalComparison();
+    }
+  },
+
+  /**
+   * Update modal comparison content
+   */
+  updateModalComparison() {
+    const outputDiv = this.elements.modalBody.querySelector('.comparison-output');
+    if (outputDiv) {
+      outputDiv.innerHTML = Renderer.renderDiff(this.state.diffResult, this.state.displayMode);
+      outputDiv.className = `comparison-output diff-${this.state.displayMode}`;
+    }
+
+    // Update footer stats
+    if (this.state.diffResult) {
+      this.elements.modalFooter.innerHTML = Renderer.renderLegend(this.state.diffResult.stats);
+    } else {
+      this.elements.modalFooter.innerHTML = Renderer.renderLegend(null);
+    }
   },
 
   /**
    * Set display mode (visible/hidden)
    * @param {string} mode - 'visible' or 'hidden'
+   * @param {boolean} fromModal - Whether called from modal toggle
    */
-  setDisplayMode(mode) {
+  setDisplayMode(mode, fromModal = false) {
     this.state.displayMode = mode;
 
-    // Update toggle buttons
-    document.querySelectorAll('.comparison-toggle .toggle-btn').forEach(btn => {
+    // Update main window toggle buttons
+    document.querySelectorAll('#comparisonWindow .comparison-toggle .toggle-btn').forEach(btn => {
       btn.classList.toggle('active', btn.dataset.mode === mode);
     });
 
-    // Re-render comparison
+    // Update modal toggle buttons
+    this.elements.modalToggle.querySelectorAll('.toggle-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.mode === mode);
+    });
+
+    // Re-render main comparison
     if (this.state.diffResult) {
       this.elements.comparisonOutput.innerHTML = Renderer.renderDiff(this.state.diffResult, mode);
       this.elements.comparisonOutput.className = `comparison-output diff-${mode}`;
+    }
+
+    // Re-render modal comparison if open
+    if (this.state.activeModal === 'comparison') {
+      this.updateModalComparison();
     }
   },
 
@@ -195,54 +256,75 @@ const App = {
     };
     this.elements.modalTitle.textContent = titles[target] || 'Window';
 
-    // Clone content into modal
+    // Reset header elements visibility
+    this.elements.modalWordCount.style.display = 'none';
+    this.elements.modalToggle.style.display = 'none';
+    this.elements.modalFooter.style.display = 'none';
+
+    // Clear modal body
     this.elements.modalBody.innerHTML = '';
 
     if (target === 'original' || target === 'revised') {
-      // Create textarea for text panels
+      // Show word count
+      this.elements.modalWordCount.style.display = '';
+      const sourceTextarea = target === 'original'
+        ? this.elements.originalText
+        : this.elements.revisedText;
+      const count = Tokenizer.countWords(sourceTextarea.value);
+      this.elements.modalWordCount.textContent = `${count} word${count !== 1 ? 's' : ''}`;
+
+      // Create textarea
       const textarea = document.createElement('textarea');
       textarea.className = 'text-input';
       textarea.spellcheck = false;
       textarea.placeholder = target === 'original'
         ? 'Paste your original text here...'
         : 'Paste your revised text here...';
-
-      // Get current value
-      const sourceTextarea = target === 'original'
-        ? this.elements.originalText
-        : this.elements.revisedText;
       textarea.value = sourceTextarea.value;
 
-      // Sync changes back
+      // Sync changes back and update word count
       textarea.addEventListener('input', () => {
         sourceTextarea.value = textarea.value;
         sourceTextarea.dispatchEvent(new Event('input'));
       });
 
       this.elements.modalBody.appendChild(textarea);
+
     } else if (target === 'comparison') {
-      // Clone comparison output
+      // Show toggle and footer
+      this.elements.modalToggle.style.display = '';
+      this.elements.modalFooter.style.display = '';
+
+      // Sync toggle state
+      this.elements.modalToggle.querySelectorAll('.toggle-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.mode === this.state.displayMode);
+      });
+
+      // Create comparison output
       const outputDiv = document.createElement('div');
-      outputDiv.className = this.elements.comparisonOutput.className;
-      outputDiv.innerHTML = this.elements.comparisonOutput.innerHTML;
+      outputDiv.className = `comparison-output diff-${this.state.displayMode}`;
+      outputDiv.innerHTML = Renderer.renderDiff(this.state.diffResult, this.state.displayMode);
       this.elements.modalBody.appendChild(outputDiv);
+
+      // Render footer stats
+      if (this.state.diffResult) {
+        this.elements.modalFooter.innerHTML = Renderer.renderLegend(this.state.diffResult.stats);
+      } else {
+        this.elements.modalFooter.innerHTML = Renderer.renderLegend(null);
+      }
     }
 
-    // Show modal with animation
+    // Show modal
+    this.elements.modalOverlay.classList.remove('closing');
     this.elements.modalOverlay.classList.add('active');
-    this.elements.modalWindow.classList.add('animating-in');
-
-    // Remove animation class after completion
-    setTimeout(() => {
-      this.elements.modalWindow.classList.remove('animating-in');
-    }, 400);
 
     // Focus textarea if applicable
     const textarea = this.elements.modalBody.querySelector('textarea');
     if (textarea) {
-      textarea.focus();
-      // Move cursor to end
-      textarea.selectionStart = textarea.selectionEnd = textarea.value.length;
+      setTimeout(() => {
+        textarea.focus();
+        textarea.selectionStart = textarea.selectionEnd = textarea.value.length;
+      }, 100);
     }
   },
 
@@ -252,13 +334,15 @@ const App = {
   closeModal() {
     if (!this.state.activeModal) return;
 
-    // Animate out
-    this.elements.modalWindow.classList.add('animating-out');
+    this.elements.modalOverlay.classList.add('closing');
+    this.elements.modalOverlay.classList.remove('active');
 
     setTimeout(() => {
-      this.elements.modalOverlay.classList.remove('active');
-      this.elements.modalWindow.classList.remove('animating-out');
+      this.elements.modalOverlay.classList.remove('closing');
       this.elements.modalBody.innerHTML = '';
+      this.elements.modalWordCount.style.display = 'none';
+      this.elements.modalToggle.style.display = 'none';
+      this.elements.modalFooter.style.display = 'none';
       this.state.activeModal = null;
     }, 300);
   }

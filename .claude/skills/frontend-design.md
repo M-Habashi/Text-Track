@@ -67,17 +67,22 @@ text-tracking/
 ```
 
 ### Aesthetic Direction
-**macOS-inspired Editorial Minimalism** - Clean windows with traffic light buttons, smooth animations, paper-like warmth.
+**macOS-inspired Editorial Minimalism** - Dark grey window headers, traffic light buttons, smooth animations, paper-like warmth.
 
 ### Layout
 ```
-┌─────────────────────┬───────────────────────┐
-│   Original (top)    │                       │
-│   [macOS window]    │    Comparison         │
-├─────────────────────┤    [macOS window]     │
-│   Revised (bottom)  │                       │
-│   [macOS window]    │                       │
-└─────────────────────┴───────────────────────┘
+┌─────────────────────────────────────────────────────┐
+│              Text Compare (header)                  │
+│     Word-level comparison with change tracking      │
+├─────────────────────┬───────────────────────────────┤
+│   Original (top)    │                               │
+│   [macOS window]    │    Comparison                 │
+├─────────────────────┤    [macOS window]             │
+│   Revised (bottom)  │                               │
+│   [macOS window]    │                               │
+├─────────────────────┴───────────────────────────────┤
+│              (footer)                               │
+└─────────────────────────────────────────────────────┘
 ```
 
 ### Design Tokens (in css/styles.css)
@@ -90,6 +95,10 @@ text-tracking/
 --color-inserted: #2563EB            /* Clear blue */
 --color-moved: #7C3AED               /* Purple */
 
+/* Window header - DARK GREY */
+--window-header-bg: linear-gradient(180deg, #4A4A4A 0%, #3A3A3A 100%)
+--window-header-text: #FFFFFF
+
 /* macOS traffic lights */
 --color-traffic-close: #FF5F57
 --color-traffic-minimize: #FFBD2E
@@ -98,26 +107,35 @@ text-tracking/
 /* Typography */
 --font-serif: 'Crimson Pro'          /* Body text, textareas */
 --font-mono: 'JetBrains Mono'        /* Labels, stats, counts */
---font-system: -apple-system, ...    /* Window titles */
+--font-system: -apple-system, ...    /* Window titles (white on dark) */
 ```
 
 ### Key Features
-- **macOS-style windows**: Traffic lights (close, minimize, maximize), gradient header
+- **App header/footer**: Title "Text Compare" and subtitle at top, footer at bottom
+- **macOS-style windows**: Dark grey headers, traffic lights, white title text
+- **Word count on RIGHT**: Displayed on right side of window header
 - **Real-time comparison**: Debounced (300ms) - no Compare button needed
-- **Maximize modal**: Green button opens full-screen popup with smooth macOS-like animations
-- **Stats bar**: Shows -removed / +added / moved counts inline
+- **Maximize modal**: Green button opens full-screen popup with smooth animations
+- **Legend with stats**: Footer shows `-X Removed`, `+X Added`, `X Moved paragraphs` with colors
 
 ### Component Structure
+- **Header**: App title + subtitle
 - **Left Panel**: Original (top) + Revised (bottom) stacked
 - **Right Panel**: Comparison window (full height)
+- **Footer**: App footer
 - **Each window has**:
-  - Traffic light buttons (maximize enabled)
-  - Window title
-  - Word count (in header)
+  - Dark grey header with traffic lights
+  - Window title (centered, white)
+  - Word count (right side, muted white)
 - **Comparison window has**:
   - Show/Hide toggle in header
-  - Stats bar below header
-  - Legend in footer
+  - Legend with stats in footer
+
+### Legend Format (in footer)
+```
+-5 Removed  |  +3 Added  |  2 Moved paragraphs
+```
+Stats have matching colors (red, blue, purple), labels are capitalized (first letter only).
 
 ### Display Modes
 1. **Visible (Show)**: Red strikethrough for deleted, blue for inserted, purple border + badge for moved
@@ -127,19 +145,20 @@ text-tracking/
 ```html
 <span class="moved-indicator">
   <span class="moved-indicator-icon"></span>
-  Moved Paragraph — was at position X
+  Moved paragraph — was at position X
 </span>
 ```
+Note: "Moved paragraph" not all caps, just first letter capitalized.
 
 ### JavaScript Modules
 | File | Exports | Purpose |
 |------|---------|---------|
 | `tokenizer.js` | `Tokenizer` | splitParagraphs, tokenizeWords, fingerprint, countWords |
 | `diff-engine.js` | `DiffEngine` | Myers diff, paragraph alignment, move detection |
-| `renderer.js` | `Renderer` | renderDiff, renderStats (improved moved indicators) |
-| `app.js` | `App` | Real-time comparison with debounce, modal maximize, display mode toggle |
+| `renderer.js` | `Renderer` | renderDiff, renderLegend (with stats) |
+| `app.js` | `App` | Real-time comparison, modal maximize, display mode toggle |
 
 ### Animations
-- **Modal open**: scale(0.8) → scale(1), translateY(30px) → 0, 400ms ease-out
-- **Modal close**: scale(1) → scale(0.8), 0 → translateY(30px), 300ms ease-out
-- **Overlay**: backdrop-filter blur(4px), opacity fade
+- **Modal open**: scale(0.9) → scale(1), opacity 0→1, 400ms ease-out
+- **Modal close**: Uses `.closing` class, scale(1) → scale(0.9), opacity 1→0, 300ms
+- **Overlay**: backdrop-filter blur(4px), opacity fade with visibility transition
