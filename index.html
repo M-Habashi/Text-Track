@@ -14,99 +14,122 @@
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-  <!-- HEADER -->
-  <header class="app-header">
-    <h1 class="app-title">Text Compare</h1>
-    <p class="app-subtitle">Word-level comparison with change tracking</p>
-  </header>
+  <!-- APP CONTAINER -->
+  <div class="app-container">
 
-  <!-- MAIN CONTAINER -->
-  <main class="app-main">
+    <!-- LEFT PANEL: Original (top) + Revised (bottom) -->
+    <div class="left-panel">
 
-    <!-- INPUT SECTION -->
-    <section class="input-section" id="inputSection">
-      <div class="input-panel">
-        <div class="panel-header">
-          <label for="originalText" class="panel-label">Original</label>
-          <span class="word-count" id="originalWordCount">0 words</span>
+      <!-- Original Text Window -->
+      <div class="macos-window" id="originalWindow">
+        <div class="window-header">
+          <div class="traffic-lights">
+            <button class="traffic-light close" aria-label="Close" disabled></button>
+            <button class="traffic-light minimize" aria-label="Minimize" disabled></button>
+            <button class="traffic-light maximize" aria-label="Maximize" data-target="original"></button>
+          </div>
+          <span class="window-word-count" id="originalWordCount">0 words</span>
+          <span class="window-title">Original</span>
         </div>
-        <textarea
-          id="originalText"
-          class="text-input"
-          placeholder="Paste your original text here..."
-          spellcheck="false"
-        ></textarea>
-      </div>
-
-      <div class="input-panel">
-        <div class="panel-header">
-          <label for="revisedText" class="panel-label">Revised</label>
-          <span class="word-count" id="revisedWordCount">0 words</span>
-        </div>
-        <textarea
-          id="revisedText"
-          class="text-input"
-          placeholder="Paste your revised text here..."
-          spellcheck="false"
-        ></textarea>
-      </div>
-    </section>
-
-    <!-- CONTROLS -->
-    <section class="controls-section">
-      <button type="button" class="btn-compare" id="compareBtn">
-        Compare Texts
-      </button>
-    </section>
-
-    <!-- OUTPUT SECTION -->
-    <section class="output-section hidden" id="outputSection">
-      <div class="output-header">
-        <h2 class="output-title">Comparison Result</h2>
-        <div class="display-toggle">
-          <button
-            type="button"
-            class="toggle-btn active"
-            id="toggleVisible"
-            data-mode="visible"
-          >Show Changes</button>
-          <button
-            type="button"
-            class="toggle-btn"
-            id="toggleHidden"
-            data-mode="hidden"
-          >Hide Changes</button>
+        <div class="window-body">
+          <textarea
+            id="originalText"
+            class="text-input"
+            placeholder="Paste your original text here..."
+            spellcheck="false"
+          ></textarea>
         </div>
       </div>
 
-      <div class="output-stats" id="outputStats"></div>
-
-      <div class="output-content diff-visible" id="outputContent"></div>
-
-      <div class="output-legend">
-        <div class="legend-item">
-          <span class="legend-deleted">removed</span>
-          <span class="legend-label">Deleted</span>
+      <!-- Revised Text Window -->
+      <div class="macos-window" id="revisedWindow">
+        <div class="window-header">
+          <div class="traffic-lights">
+            <button class="traffic-light close" aria-label="Close" disabled></button>
+            <button class="traffic-light minimize" aria-label="Minimize" disabled></button>
+            <button class="traffic-light maximize" aria-label="Maximize" data-target="revised"></button>
+          </div>
+          <span class="window-word-count" id="revisedWordCount">0 words</span>
+          <span class="window-title">Revised</span>
         </div>
-        <div class="legend-item">
-          <span class="legend-inserted">added</span>
-          <span class="legend-label">Inserted</span>
-        </div>
-        <div class="legend-item">
-          <span class="legend-moved">moved</span>
-          <span class="legend-label">Moved paragraph</span>
+        <div class="window-body">
+          <textarea
+            id="revisedText"
+            class="text-input"
+            placeholder="Paste your revised text here..."
+            spellcheck="false"
+          ></textarea>
         </div>
       </div>
-    </section>
 
-  </main>
+    </div>
 
-  <!-- FOOTER -->
-  <footer class="app-footer">
-    <p>Word-level diff with paragraph move detection</p>
-  </footer>
+    <!-- RIGHT PANEL: Comparison -->
+    <div class="right-panel">
 
-  <!-- JavaScript Modules (order matters: dependencies first) -->
+      <!-- Comparison Window -->
+      <div class="macos-window" id="comparisonWindow">
+        <div class="window-header">
+          <div class="traffic-lights">
+            <button class="traffic-light close" aria-label="Close" disabled></button>
+            <button class="traffic-light minimize" aria-label="Minimize" disabled></button>
+            <button class="traffic-light maximize" aria-label="Maximize" data-target="comparison"></button>
+          </div>
+          <div class="comparison-toggle">
+            <button type="button" class="toggle-btn active" data-mode="visible">Show</button>
+            <button type="button" class="toggle-btn" data-mode="hidden">Hide</button>
+          </div>
+          <span class="window-title">Comparison</span>
+        </div>
+        <div class="stats-bar" id="statsBar">
+          <!-- Stats rendered dynamically -->
+        </div>
+        <div class="window-body">
+          <div class="comparison-output diff-visible" id="comparisonOutput">
+            <div class="empty-state">
+              <div class="empty-state-icon">&#8644;</div>
+              <p>Enter text in both panels to see comparison</p>
+            </div>
+          </div>
+        </div>
+        <div class="comparison-footer">
+          <div class="legend-item">
+            <span class="legend-deleted">removed</span>
+            <span class="legend-label">Deleted</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-inserted">added</span>
+            <span class="legend-label">Inserted</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-moved">moved</span>
+            <span class="legend-label">Moved</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- MAXIMIZE MODAL -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal-window" id="modalWindow">
+      <div class="window-header">
+        <div class="traffic-lights">
+          <button class="traffic-light close" aria-label="Close" id="modalClose"></button>
+          <button class="traffic-light minimize" aria-label="Minimize" disabled></button>
+          <button class="traffic-light maximize" aria-label="Maximize" disabled></button>
+        </div>
+        <span class="window-title" id="modalTitle">Window</span>
+      </div>
+      <div class="modal-body" id="modalBody">
+        <!-- Content cloned here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript Modules -->
   <script src="js/tokenizer.js"></script>
   <script src="js/diff-engine.js"></script>
   <script src="js/renderer.js"></script>

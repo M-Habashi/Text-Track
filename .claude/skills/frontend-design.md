@@ -63,44 +63,83 @@ text-tracking/
     ├── tokenizer.js        # Text parsing module
     ├── diff-engine.js      # Myers diff algorithm
     ├── renderer.js         # HTML output generation
-    └── app.js              # App controller + events
+    └── app.js              # App controller + real-time comparison
 ```
 
 ### Aesthetic Direction
-**Editorial Minimalism** - Clean, paper-like feel inspired by literary magazines and professional writing tools.
+**macOS-inspired Editorial Minimalism** - Clean windows with traffic light buttons, smooth animations, paper-like warmth.
+
+### Layout
+```
+┌─────────────────────┬───────────────────────┐
+│   Original (top)    │                       │
+│   [macOS window]    │    Comparison         │
+├─────────────────────┤    [macOS window]     │
+│   Revised (bottom)  │                       │
+│   [macOS window]    │                       │
+└─────────────────────┴───────────────────────┘
+```
 
 ### Design Tokens (in css/styles.css)
 ```css
 /* Colors */
---color-bg-primary: #FAFAF8      /* Warm off-white */
---color-text-primary: #1A1A1A    /* Near-black */
---color-deleted: #C53030         /* Warm red */
---color-inserted: #2563EB        /* Clear blue */
---color-moved: #7C3AED           /* Purple */
+--color-bg-primary: #FAFAF8          /* Warm off-white */
+--color-bg-window: #FFFFFF           /* Window background */
+--color-text-primary: #1A1A1A        /* Near-black */
+--color-deleted: #C53030             /* Warm red */
+--color-inserted: #2563EB            /* Clear blue */
+--color-moved: #7C3AED               /* Purple */
+
+/* macOS traffic lights */
+--color-traffic-close: #FF5F57
+--color-traffic-minimize: #FFBD2E
+--color-traffic-maximize: #28C840
 
 /* Typography */
---font-serif: 'Crimson Pro'      /* Body text, textareas */
---font-mono: 'JetBrains Mono'    /* Labels, stats, counts */
+--font-serif: 'Crimson Pro'          /* Body text, textareas */
+--font-mono: 'JetBrains Mono'        /* Labels, stats, counts */
+--font-system: -apple-system, ...    /* Window titles */
 ```
 
+### Key Features
+- **macOS-style windows**: Traffic lights (close, minimize, maximize), gradient header
+- **Real-time comparison**: Debounced (300ms) - no Compare button needed
+- **Maximize modal**: Green button opens full-screen popup with smooth macOS-like animations
+- **Stats bar**: Shows -removed / +added / moved counts inline
+
 ### Component Structure
-- **Header**: Title + subtitle
-- **Input Section**: Side-by-side textareas with word counts
-- **Controls**: Compare button (centered)
-- **Output Section**:
-  - Toggle buttons (Show/Hide changes)
-  - Statistics grid
-  - Diff output with paragraph support
-  - Legend
+- **Left Panel**: Original (top) + Revised (bottom) stacked
+- **Right Panel**: Comparison window (full height)
+- **Each window has**:
+  - Traffic light buttons (maximize enabled)
+  - Window title
+  - Word count (in header)
+- **Comparison window has**:
+  - Show/Hide toggle in header
+  - Stats bar below header
+  - Legend in footer
 
 ### Display Modes
-1. **Visible**: Red strikethrough for deleted, blue for inserted, purple border for moved
-2. **Hidden**: Clean text, red dot markers for deletions, bold for insertions
+1. **Visible (Show)**: Red strikethrough for deleted, blue for inserted, purple border + badge for moved
+2. **Hidden (Hide)**: Clean final text, red dot markers for deletions, bold for insertions
+
+### Moved Paragraph Indicator
+```html
+<span class="moved-indicator">
+  <span class="moved-indicator-icon"></span>
+  Moved Paragraph — was at position X
+</span>
+```
 
 ### JavaScript Modules
 | File | Exports | Purpose |
 |------|---------|---------|
 | `tokenizer.js` | `Tokenizer` | splitParagraphs, tokenizeWords, fingerprint, countWords |
 | `diff-engine.js` | `DiffEngine` | Myers diff, paragraph alignment, move detection |
-| `renderer.js` | `Renderer` | renderDiff, renderStats |
-| `app.js` | `App` | State management, event handling |
+| `renderer.js` | `Renderer` | renderDiff, renderStats (improved moved indicators) |
+| `app.js` | `App` | Real-time comparison with debounce, modal maximize, display mode toggle |
+
+### Animations
+- **Modal open**: scale(0.8) → scale(1), translateY(30px) → 0, 400ms ease-out
+- **Modal close**: scale(1) → scale(0.8), 0 → translateY(30px), 300ms ease-out
+- **Overlay**: backdrop-filter blur(4px), opacity fade

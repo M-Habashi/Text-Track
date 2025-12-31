@@ -21,8 +21,13 @@ const Renderer = {
    * @returns {string} HTML string
    */
   renderDiff(diffResult, mode = 'visible') {
-    if (diffResult.paragraphs.length === 0) {
-      return '<div class="no-changes">No text to compare</div>';
+    if (!diffResult || diffResult.paragraphs.length === 0) {
+      return `
+        <div class="empty-state">
+          <div class="empty-state-icon">&#8644;</div>
+          <p>Enter text in both panels to see comparison</p>
+        </div>
+      `;
     }
 
     // Check if there are any changes
@@ -32,7 +37,7 @@ const Renderer = {
     );
 
     if (!hasChanges) {
-      return '<div class="no-changes">No changes detected - texts are identical</div>';
+      return '<div class="no-changes">No changes detected — texts are identical</div>';
     }
 
     let html = '';
@@ -41,9 +46,15 @@ const Renderer = {
       let paraClass = 'diff-paragraph';
       let movedIndicator = '';
 
+      // Create clearer moved paragraph indicator
       if (para.movedFrom !== null) {
         paraClass += ' paragraph-moved';
-        movedIndicator = `<span class="moved-indicator">Moved from position ${para.movedFrom + 1}</span>`;
+        movedIndicator = `
+          <span class="moved-indicator">
+            <span class="moved-indicator-icon"></span>
+            Moved Paragraph — was at position ${para.movedFrom + 1}
+          </span>
+        `;
       }
 
       let content = movedIndicator;
@@ -87,29 +98,23 @@ const Renderer = {
   },
 
   /**
-   * Render statistics grid
+   * Render statistics bar
    * @param {Object} stats - Statistics from DiffEngine
    * @returns {string} HTML string
    */
   renderStats(stats) {
-    let html = '<div class="stats-grid">';
+    if (!stats) return '';
+
+    let html = '';
 
     html += `
-      <div class="stat-item">
-        <span class="stat-value">${stats.wordsOriginal}</span>
-        <span class="stat-label">Original</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-value">${stats.wordsRevised}</span>
-        <span class="stat-label">Revised</span>
-      </div>
       <div class="stat-item stat-deleted">
         <span class="stat-value">-${stats.wordsDeleted}</span>
-        <span class="stat-label">Removed</span>
+        <span class="stat-label">removed</span>
       </div>
       <div class="stat-item stat-inserted">
         <span class="stat-value">+${stats.wordsAdded}</span>
-        <span class="stat-label">Added</span>
+        <span class="stat-label">added</span>
       </div>
     `;
 
@@ -117,12 +122,11 @@ const Renderer = {
       html += `
         <div class="stat-item stat-moved">
           <span class="stat-value">${stats.paragraphsMoved}</span>
-          <span class="stat-label">Moved</span>
+          <span class="stat-label">moved</span>
         </div>
       `;
     }
 
-    html += '</div>';
     return html;
   }
 };
