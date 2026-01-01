@@ -137,6 +137,74 @@ body {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
+   ANIMATED SUBTITLE
+   ═══════════════════════════════════════════════════════════════════════════ */
+.animated-subtitle {
+  position: relative;
+  min-height: 1.5em;
+}
+
+.subtitle-option {
+  display: none;
+}
+
+.subtitle-option.active {
+  display: inline;
+}
+
+.subtitle-deleted {
+  position: relative;
+  color: var(--color-text-muted);
+  transition: color 600ms ease;
+}
+
+.subtitle-deleted.animating {
+  color: var(--color-deleted);
+}
+
+/* Strikethrough line that animates */
+.subtitle-deleted::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 0;
+  height: 2px;
+  background-color: var(--color-deleted);
+  transition: width 400ms ease;
+}
+
+.subtitle-deleted.strikethrough::after {
+  width: 100%;
+}
+
+.subtitle-inserted {
+  color: var(--color-inserted);
+  font-weight: 500;
+}
+
+.subtitle-rest {
+  color: var(--color-text-muted);
+}
+
+/* Typing cursor effect */
+.subtitle-inserted::after {
+  content: '|';
+  color: var(--color-inserted);
+  animation: blink 600ms ease-in-out infinite;
+  margin-left: 1px;
+}
+
+.subtitle-inserted.typing-done::after {
+  display: none;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
    APP LAYOUT - Split view
    ═══════════════════════════════════════════════════════════════════════════ */
 .app-container {

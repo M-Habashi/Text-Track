@@ -44,6 +44,66 @@ const App = {
     this.bindEvents();
     this.updateWordCounts();
     this.renderDefaultLegend();
+    this.animateSubtitle();
+  },
+
+  /**
+   * Animate the subtitle with random option selection
+   */
+  animateSubtitle() {
+    const options = document.querySelectorAll('.subtitle-option');
+    if (options.length === 0) return;
+
+    // Randomly pick one option
+    const randomIndex = Math.floor(Math.random() * options.length);
+    const selectedOption = options[randomIndex];
+    selectedOption.classList.add('active');
+
+    const deletedEl = selectedOption.querySelector('.subtitle-deleted');
+    const insertedEl = selectedOption.querySelector('.subtitle-inserted');
+    const wordToType = insertedEl.dataset.word;
+
+    // Animation timeline
+    // Step 1: Wait a moment, then turn deleted word red (600ms delay)
+    setTimeout(() => {
+      deletedEl.classList.add('animating');
+
+      // Step 2: Add strikethrough (400ms after turning red)
+      setTimeout(() => {
+        deletedEl.classList.add('strikethrough');
+
+        // Step 3: Start typing the inserted word (400ms after strikethrough)
+        setTimeout(() => {
+          this.typeWord(insertedEl, wordToType, 0);
+        }, 400);
+
+      }, 600);
+
+    }, 800);
+  },
+
+  /**
+   * Type a word character by character
+   * @param {HTMLElement} element - Element to type into
+   * @param {string} word - Word to type
+   * @param {number} index - Current character index
+   */
+  typeWord(element, word, index) {
+    if (index <= word.length) {
+      element.textContent = word.substring(0, index);
+
+      if (index < word.length) {
+        // Continue typing
+        setTimeout(() => {
+          this.typeWord(element, word, index + 1);
+        }, 80);
+      } else {
+        // Typing complete - hide cursor after a brief pause
+        setTimeout(() => {
+          element.classList.add('typing-done');
+        }, 500);
+      }
+    }
   },
 
   /**

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Text Compare</title>
+  <title>Text Track</title>
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -16,8 +16,17 @@
 <body>
   <!-- HEADER -->
   <header class="app-header">
-    <h1 class="app-title">Text Compare</h1>
-    <p class="app-subtitle">Word-level comparison with change tracking</p>
+    <h1 class="app-title">Text Track</h1>
+    <p class="app-subtitle animated-subtitle" id="animatedSubtitle">
+      <!-- Option 1: Truck → Track -->
+      <span class="subtitle-option" data-option="1">
+        <span class="subtitle-deleted" data-word="Truck">Truck</span><span class="subtitle-inserted" data-word="Track"></span><span class="subtitle-rest"> your text changes</span>
+      </span>
+      <!-- Option 2: Forget → Remember -->
+      <span class="subtitle-option" data-option="2">
+        <span class="subtitle-deleted" data-word="Forget">Forget</span><span class="subtitle-inserted" data-word="Remember"></span><span class="subtitle-rest"> what you changed</span>
+      </span>
+    </p>
   </header>
 
   <!-- APP CONTAINER -->

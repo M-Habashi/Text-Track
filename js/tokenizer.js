@@ -64,7 +64,8 @@ const Tokenizer = {
    */
   countWords(text) {
     if (!text.trim()) return 0;
-    return text.trim().split(/\s+/).length;
+    // Only count tokens that contain at least one letter or number
+    return text.trim().split(/\s+/).filter(token => /[\p{L}\p{N}]/u.test(token)).length;
   }
 };
 
